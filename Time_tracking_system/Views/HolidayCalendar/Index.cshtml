@@ -1,0 +1,61 @@
+﻿@model List<Time_tracking_system.Domain.ViewModels.YearsVM>
+
+@{
+    ViewData["Title"] = "Производственные календари";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Производственные календари</h1>
+
+<p>
+    <a class="btn btn-success" asp-action="Create">Создать</a>
+</p>
+<div class="row">
+    <div class="col-md-7">
+        <table id="tblDataOrder0" class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                        @Html.DisplayNameFor(model => model[0].Year)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model[0].CalendarInputStatus)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    <tr>
+                        <td>
+                            @(i+1)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => Model[i].Year)
+                        </td>
+                        <td>
+                            @if (Model[i].CalendarInputStatus == true)
+                            {
+                                <span>Введен в обращение</span>
+                            }
+                            else
+                            {
+                                <span>Ожидает ввода в обращение</span>
+                            }
+                        </td>
+                        <td>
+                            <a class="btn btn-success btn-sm" title="Редактировать" asp-action="Edit" asp-route-id="@Model[i].Id">
+                                <i class="fa fa-edit"></i>
+                            </a>
+                            <a class="btn btn-warning btn-sm" title="Подробнее" asp-action="Details" asp-route-id="@Model[i].Id">
+                                <i class="fa fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

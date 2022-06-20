@@ -1,0 +1,61 @@
+﻿@model Time_tracking_system.Domain.ViewModels.EditEmployeeVM
+
+<div>
+    <input type="hidden" asp-for="EmpVM.Id" />
+    <input type="hidden" asp-for="EmpVM.UserName" />
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="EmpVM.FirstName" class="control-label"></label>
+                <input id="edit0" asp-for="EmpVM.FirstName" class="form-control" />
+                <span asp-validation-for="EmpVM.FirstName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="EmpVM.LastName" class="control-label"></label>
+                <input id="edit1" asp-for="EmpVM.LastName" class="form-control" />
+                <span asp-validation-for="EmpVM.LastName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="EmpVM.Patronymic" class="control-label"></label>
+                <input id="edit2" asp-for="EmpVM.Patronymic" class="form-control" />
+                <span asp-validation-for="EmpVM.Patronymic" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="RoleId" class="control-label"></label>
+                <select id="edit3" class="form-control" asp-for="RoleId" asp-items="ViewBag.listRole"></select>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="form-group">
+                <label asp-for="EmpVM.Post" class="control-label"></label>
+                <input id="edit4" asp-for="EmpVM.Post" class="form-control" />
+                <span asp-validation-for="EmpVM.Post" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="EmpVM.PhoneNumber" class="control-label"></label>
+                <input asp-for="EmpVM.PhoneNumber" class="form-control" />
+                <span asp-validation-for="EmpVM.PhoneNumber" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="form-group">
+                <label asp-for="EmpVM.Email" class="control-label"></label>
+                <input asp-for="EmpVM.Email" class="form-control" />
+                <span asp-validation-for="EmpVM.Email" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+</div>

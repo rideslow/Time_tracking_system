@@ -1,0 +1,428 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model Time_tracking_system.Domain.ViewModels.AttrAndRequestVM
+@inject UserManager<Employee> UserManager
+
+@{
+    ViewData["Title"] = "Подробнее";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@Html.DisplayFor(model => model.request.TypeRequest.Name)</h1>
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<h4>
+    @Html.DisplayNameFor(model => model.request.DateCreated) - @Html.DisplayFor(model => model.request.DateCreated)
+</h4>
+
+<div id="titleInfo" class="alert" role="alert">
+    <h4 class="alert-heading">
+        <strong>@Html.DisplayNameFor(model => model.request.StatusRequest):</strong>
+        <span id="statusName">@Html.DisplayFor(model => model.request.StatusRequest.Name)</span>
+    </h4>
+    <p>
+        <strong>@Html.DisplayNameFor(model => model.request.Applicant):</strong>
+        @Html.DisplayFor(model => model.request.Applicant.FirstName)
+        @Html.DisplayFor(model => model.request.Applicant.LastName)
+        @Html.DisplayFor(model => model.request.Applicant.Patronymic)
+    </p>
+    <hr />
+    <p>
+        @Html.DisplayNameFor(model => model.request.DateRequested): @Html.DisplayFor(model => model.request.DateRequested)
+    </p>
+</div>
+
+<div>
+    <hr />
+    <div class="row">
+        <div class="col-sm-5">
+            <div class="form-group">
+                <strong>@Html.DisplayNameFor(model => model.request.StartDate)</strong>
+            </div>
+        </div>
+        <div class="col-sm-7">
+            <div class="form-group">
+                @Html.DisplayFor(model => model.request.StartDate)
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-5">
+            <div class="form-group">
+                <strong>@Html.DisplayNameFor(model => model.request.EndDate)</strong>
+            </div>
+        </div>
+        <div class="col-sm-7">
+            <div class="form-group">
+                @Html.DisplayFor(model => model.request.EndDate)
+            </div>
+        </div>
+    </div>
+
+    @for (int i = 0; i < Model.listValueRequestAttr.Count; i++)
+    {
+        <div class="row">
+            <div class="col-sm-5">
+                <div class="form-group">
+                    <strong>@Html.DisplayFor(model => model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.NameAttributes)</strong>
+                </div>
+            </div>
+            @if (Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.TypeData == "text")
+            {
+                <div class="col-sm-7">
+                    <div class="form-group">
+                        @Html.DisplayFor(model => model.listValueRequestAttr[i].ValueText)
+                    </div>
+                </div>
+            }
+            else if (Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.TypeData == "Bool")
+            {
+                if ((bool)Model.listValueRequestAttr[i].ValueBool)
+                {
+                    <div class="col-sm-7">
+                        <div class="form-group">
+                            Да
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-sm-7">
+                        <div class="form-group">
+                            Нет
+                        </div>
+                    </div>
+                }
+            }
+            else if (Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.TypeData == "Employee")
+            {
+                <div class="col-sm-7">
+                    <div class="form-group">
+                        @Html.DisplayFor(model => model.listValueRequestAttr[i].Employee.FirstName)
+                        @Html.DisplayFor(model => model.listValueRequestAttr[i].Employee.LastName)
+                        @Html.DisplayFor(model => model.listValueRequestAttr[i].Employee.Patronymic)
+                    </div>
+                </div>
+            }
+            else if (Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.TypeData == "DateTime")
+            {
+                <div class="col-sm-7">
+                    <div class="form-group">
+                        @Html.DisplayFor(model => model.listValueRequestAttr[i].ValueDate)
+                    </div>
+                </div>
+            }
+            else if (Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.TypeData == "TypeVocation")
+            {
+                <div class="col-sm-7">
+                    <div class="form-group">
+                        @Html.DisplayFor(model => model.listValueRequestAttr[i].TypeVocation.Name)
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-sm-5">
+            <div class="form-group">
+                <strong>@Html.DisplayNameFor(model => model.request.Cordinating)</strong>
+            </div>
+        </div>
+        <div class="col-sm-7">
+            <div class="form-group">
+                @Html.DisplayFor(model => model.request.Cordinating.FirstName)
+                @Html.DisplayFor(model => model.request.Cordinating.LastName)
+                @Html.DisplayFor(model => model.request.Cordinating.Patronymic)
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-5">
+            <div class="form-group">
+                <strong>@Html.DisplayNameFor(model => model.request.CountDayOnRequest)</strong>
+            </div>
+        </div>
+        <div class="col-sm-7">
+            <div class="form-group">
+                @Html.DisplayFor(model => model.request.CountDayOnRequest)
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <a class="btn btn-outline-secondary" asp-action="Index">
+        <i class="fa fa-arrow-left"></i> Вернуться к заявкам
+    </a>
+    @if (User.IsInRole("Руководитель") &&
+Model.request.StatusRequest.Name == "Отправлена на согласование")
+    {
+        <a id="Agreed" class="btn btn-outline-success" onclick="Agreed(@Model.request.Id)">
+            <i class="fa fa-check"></i> Согласовать
+        </a>
+        <a id="NotAgreed" class="btn btn-outline-danger" onclick="NotAgreed(@Model.request.Id)">
+            <i class="fa fa-times"></i> Не согласовывать
+        </a>
+    }
+    else if (User.IsInRole("Директор") &&
+        Model.request.StatusRequest.Name == "Согласована")
+    {
+        <a id="Approved" class="btn btn-outline-success" onclick="Approved(@Model.request.Id)">
+            <i class="fa fa-check"></i> Утвердить
+        </a>
+        <a id="NotApproved" class="btn btn-outline-danger" onclick="NotApproved(@Model.request.Id)">
+            <i class="fa fa-times"></i> Не утверждать
+        </a>
+    }
+    else if (User.IsInRole("Руководитель") &&
+        Model.request.StatusRequest.Name == "Ожидает отмены руководителем")
+    {
+        <a id="CancellationConfirmationByManager" class="btn btn-outline-success"
+           onclick="CancellationConfirmationByManager(@Model.request.Id)">
+            <i class="fa fa-check"></i> Подтвердить отмену
+        </a>
+    }
+    else if (User.IsInRole("Директор") &&
+        Model.request.StatusRequest.Name == "Ожидает отмены директором")
+    {
+        <a id="CancellationConfirmationByDirector" class="btn btn-outline-success"
+           onclick="CancellationConfirmationByDirector(@Model.request.Id)">
+            <i class="fa fa-check"></i> Подтвердить отмену
+        </a>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var status = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(@Model.request.StatusRequest.Name) as String);
+            var element = document.getElementById("titleInfo");
+            if (status == "Новая" || status == "Отменена")
+                element.classList.add("bg-info");
+            else if (status == "Отправлена на согласование")
+                element.classList.add("bg-warning");
+            else if (status == "Согласована")
+                element.classList.add("bg-lime");
+            else if (status == "Утверждена")
+                element.classList.add("bg-success");
+            else if (status == "Отозвана")
+                element.classList.add("bg-maroon");
+            else
+                element.classList.add("bg-danger");
+        });
+
+        function Agreed(idRequest) {
+           $.ajax({
+                type: 'GET',
+                url: '@Url.Action("AgreedReview")',
+                data: { id: idRequest },
+                success: function (data) {
+                    if (data == true) {
+                        $(document).Toasts('create', {
+                            class: 'bg-success',
+                            title: 'Успех',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Заявка согласована.'
+                        })
+                        document.getElementById('Agreed').setAttribute("hidden", "hidden");
+                        document.getElementById('NotAgreed').setAttribute("hidden", "hidden");
+                        var title = document.getElementById('titleInfo');
+                        title.classList.remove("bg-warning");
+                        title.classList.add("bg-lime");
+                        document.getElementById('statusName').innerHTML = "Согласована";
+
+                    }
+                    else {
+                        $(document).Toasts('create', {
+                            class: 'bg-danger',
+                            title: 'Ошибка',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Произошла ошибка в согласовании данной заявки. Повторите позднее.'
+                        })
+                    }
+                }
+            });
+        }
+
+        function NotAgreed(idRequest) {
+           $.ajax({
+                type: 'GET',
+                url: '@Url.Action("NotAgreedReview")',
+                data: { id: idRequest },
+                success: function (data) {
+                    if (data == true) {
+                        $(document).Toasts('create', {
+                            class: 'bg-success',
+                            title: 'Успех',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Заявка не согласована.'
+                        })
+                        document.getElementById('Agreed').setAttribute("hidden", "hidden");
+                        document.getElementById('NotAgreed').setAttribute("hidden", "hidden");
+                        var title = document.getElementById('titleInfo');
+                        title.classList.remove("bg-warning");
+                        title.classList.add("bg-danger");
+                        document.getElementById('statusName').innerHTML = "Не согласована";
+                    }
+                    else {
+                        $(document).Toasts('create', {
+                            class: 'bg-danger',
+                            title: 'Ошибка',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Произошла ошибка. Повторите позднее.'
+                        })
+                    }
+                }
+            });
+        }
+
+        function Approved(idRequest) {
+           $.ajax({
+                type: 'GET',
+                url: '@Url.Action("ApprovedReview")',
+                data: { id: idRequest },
+                success: function (data) {
+                    if (data == true) {
+                        $(document).Toasts('create', {
+                            class: 'bg-success',
+                            title: 'Успех',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Заявка утверждена.'
+                        })
+                        document.getElementById('Approved').setAttribute("hidden", "hidden");
+                        document.getElementById('NotApproved').setAttribute("hidden", "hidden");
+                        var title = document.getElementById('titleInfo');
+                        title.classList.remove("bg-lime");
+                        title.classList.add("bg-success");
+                        document.getElementById('statusName').innerHTML = "Утверждена";
+                    }
+                    else {
+                        $(document).Toasts('create', {
+                            class: 'bg-danger',
+                            title: 'Ошибка',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Произошла ошибка в утверждении данной заявки. Повторите позднее.'
+                        })
+                    }
+                }
+            });
+        }
+
+        function NotApproved(idRequest) {
+           $.ajax({
+                type: 'GET',
+                url: '@Url.Action("NotApprovedReview")',
+                data: { id: idRequest },
+                success: function (data) {
+                    if (data == true) {
+                        $(document).Toasts('create', {
+                            class: 'bg-success',
+                            title: 'Успех',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Заявка не утверждена.'
+                        })
+                        document.getElementById('Approved').setAttribute("hidden", "hidden");
+                        document.getElementById('NotApproved').setAttribute("hidden", "hidden");
+                        var title = document.getElementById('titleInfo');
+                        title.classList.remove("bg-lime");
+                        title.classList.add("bg-danger");
+                        document.getElementById('statusName').innerHTML = "Не утверждена";
+                    }
+                    else {
+                        $(document).Toasts('create', {
+                            class: 'bg-danger',
+                            title: 'Ошибка',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Произошла ошибка. Повторите позднее.'
+                        })
+                    }
+                }
+            });
+        }
+
+        function CancellationConfirmationByManager(idRequest) {
+           $.ajax({
+                type: 'GET',
+                url: '@Url.Action("CancellationConfirmationByManager")',
+                data: { id: idRequest },
+                success: function (data) {
+                    if (data == true) {
+                        $(document).Toasts('create', {
+                            class: 'bg-success',
+                            title: 'Успех',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Подтверждение отмены прошло успешно.'
+                        })
+                        document.getElementById('CancellationConfirmationByManager').setAttribute("hidden", "hidden");
+                        var title = document.getElementById('titleInfo');
+                        document.getElementById('statusName').innerHTML = "Ожидает подтверждения отмены директором";
+
+                    }
+                    else {
+                        $(document).Toasts('create', {
+                            class: 'bg-danger',
+                            title: 'Ошибка',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Произошла ошибка в подтверждении отмены данной заявки. Повторите позднее.'
+                        })
+                    }
+                }
+            });
+        }
+
+        function CancellationConfirmationByDirector(idRequest) {
+           $.ajax({
+                type: 'GET',
+                url: '@Url.Action("CancellationConfirmationByDirector")',
+                data: { id: idRequest },
+                success: function (data) {
+                    if (data == true) {
+                        $(document).Toasts('create', {
+                            class: 'bg-success',
+                            title: 'Успех',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Подтверждение отмены прошло успешно.'
+                        })
+                        document.getElementById('CancellationConfirmationByDirector').setAttribute("hidden", "hidden");
+                        var title = document.getElementById('titleInfo');
+                        document.getElementById('statusName').innerHTML = "Отменена";
+
+                    }
+                    else {
+                        $(document).Toasts('create', {
+                            class: 'bg-danger',
+                            title: 'Ошибка',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Произошла ошибка в подтверждении отмены данной заявки. Повторите позднее.'
+                        })
+                    }
+                }
+            });
+        }
+
+    </script>
+}

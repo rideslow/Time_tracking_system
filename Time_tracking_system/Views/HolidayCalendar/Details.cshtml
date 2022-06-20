@@ -1,0 +1,128 @@
+﻿@model Time_tracking_system.Domain.ViewModels.YearAndHolidayCalendarVM
+@{
+    ViewData["Title"] = "Подробнее";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="alert bg-info" role="alert">
+    <h4 class="alert-heading">
+        <strong>@Html.DisplayNameFor(model => model.Year.Year):</strong>
+        @Html.DisplayFor(model => model.Year.Year)
+    </h4>
+    <hr />
+    <p>
+        <strong>@Html.DisplayNameFor(model => model.Year.CalendarInputStatus):</strong>
+        @if (Model.Year.CalendarInputStatus == true)
+        {
+            <span id="statusName">Введен в обращение</span>
+        }
+        else
+        {
+            <span id="statusName">Ожидает ввода в обращение</span>
+        }
+    </p>
+</div>
+
+<div class="content-wrapper">
+    <!-- /.col -->
+    <div class="col-md-9">
+        <div class="card card-primary">
+            <div class="card-body p-0">
+                <!-- THE CALENDAR -->
+                <div id="calendar"></div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.col -->
+</div>
+<div class="form-group">
+    <a class="btn btn-outline-secondary" asp-action="Index">
+        <i class="fa fa-arrow-left"></i> Вернуться к списку годов
+    </a>
+    @if (!Model.Year.CalendarInputStatus)
+    {
+        <a id="putIntoCirculation" class="btn btn-outline-success" onclick="PutIntoCirculation(@Model.Year.Id)">
+            <i class="fa fa-check"></i> Ввести в обращение
+        </a>
+    }
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+<script>
+
+        $(function () {
+            var Year = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(@Model.Year.Year) as String);
+            var ListHolidayYear = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(@Model.ListHolidayCalendar) as String);
+            var startDate = Year + "-01-01";
+            var endDate = (Number(Year) + Number(1)) + "-01-01";
+            var Calendar = FullCalendar.Calendar;
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new Calendar(calendarEl, {
+                firstDay: 1,
+                validRange: {
+                    start: startDate,
+                    end: endDate
+                },
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: ''
+                },
+                locale: 'ru',
+                themeSystem: 'bootstrap',
+                datesSet: function (dateInfo) {
+                    $("td, th").each(function () {
+                        for (var i = 0; i < ListHolidayYear.length; i++) {
+                            var DateHoliday = moment(ListHolidayYear[i].HolidayDate).format("YYYY-MM-DD");
+                            if (DateHoliday == $(this).attr("data-date")) {
+                                $(this).css("background-color", "#FA5942");
+                            }
+                        }
+                    });
+                }
+            });
+
+            calendar.render();
+        });
+
+    function PutIntoCirculation(idYear) {
+           $.ajax({
+                type: 'GET',
+                url: '@Url.Action("PutTheCalendarIntoCirculation")',
+                data: { id: idYear },
+                success: function (data) {
+                    if (data == true) {
+                        $(document).Toasts('create', {
+                            class: 'bg-success',
+                            title: 'Успех',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Календарь успешно введен в обращение.'
+                        })
+                        document.getElementById('putIntoCirculation').setAttribute("hidden", "hidden");
+                        document.getElementById('statusName').innerHTML = "Введен в обращение";
+
+                    }
+                    else {
+                        $(document).Toasts('create', {
+                            class: 'bg-danger',
+                            title: 'Ошибка',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Произошла ошибка в введении календаря в обращение. Повторите позднее.'
+                        })
+                    }
+                }
+            });
+        }
+
+</script>
+
+}
+

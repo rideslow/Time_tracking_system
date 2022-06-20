@@ -1,0 +1,81 @@
+﻿@model List<Time_tracking_system.Domain.ViewModels.EmployeeVM>
+
+@{
+    ViewData["Title"] = "Информация о пользователе";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Информация о пользователе</h1>
+<hr />
+<div class="row form-group">
+    <div class="col-md-4">
+        <label class="control-label">Список сотрудников</label>
+        <select name="value" asp-items="@(new SelectList(Model, "Id", "FullName"))"
+                class="form-control custom-select"
+                onchange="userSelected(this.value)">
+        </select>
+    </div>
+</div>
+<hr />
+<div class="form-group">
+    <form asp-action="Edit">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div id="loadingEmployee" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Загрузка...</div></div>
+        <div id="employee"></div>
+        <div id="buttonSave" class="form-group">
+            <input type="submit" value="Save" class="btn btn-primary"/>
+        </div>
+        <div id="loadingStatusInfo" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Загрузка...</div></div>
+        <div id="statusInfo"></div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(function () {
+            var val = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model[0].Id) as String);
+            userSelected(val);
+        });
+
+        var isItAnAdmin = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(User.IsInRole("Администратор")) as String);
+
+        function userSelected(val) {
+            document.getElementById("employee").innerHTML = "";
+            $.ajax({
+                type: 'GET',
+                url: '@Url.Action("GetEmployeeByIdPV")',
+                data: { id: val },
+                beforeSend: function () {
+                    $('#buttonSave').hide();
+                    $('#loadingEmployee').show();
+                },
+                success: function (data) {
+                    $('#loadingEmployee').hide();
+                    $('#buttonSave').show();
+                    $('#employee').append(data);
+                }
+            }).done(function () {
+                if (!isItAnAdmin) {
+                    for (var i = 0; i < 5; i++) {
+                        document.getElementById('edit' + i).setAttribute("disabled", "disabled");
+                    }
+                }
+            });
+            document.getElementById("statusInfo").innerHTML = "";
+            $.ajax({
+                type: 'GET',
+                url: '@Url.Action("GetStatusInfoByIdPV")',
+                data: { id: val },
+                beforeSend: function () {
+                    $('#loadingStatusInfo').show();
+                },
+                success: function (data) {
+                    $('#loadingStatusInfo').hide();
+                    $('#statusInfo').append(data);
+                }
+            });
+        }
+    </script>
+}
+

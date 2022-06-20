@@ -1,0 +1,97 @@
+﻿@model Time_tracking_system.Domain.ViewModels.AttrAndRequestVM
+
+@{
+    ViewData["Title"] = "Редактирование";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Редактирование</h1>
+
+<div id="titleInfo" class="alert bg-info" role="alert">
+    <h3>@Html.DisplayFor(model => model.request.TypeRequest.Name)</h3>
+    <h4>
+        @Html.DisplayNameFor(model => model.request.DateCreated) - @Html.DisplayFor(model => model.request.DateCreated)
+    </h4>
+</div>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="request.Id" />
+            <input type="hidden" asp-for="request.TypeRequest_id" />
+            <input type="hidden" asp-for="request.Applicant_id" />
+            <input type="hidden" asp-for="request.DateCreated" />
+            <input type="hidden" asp-for="request.DateRequested" />
+            <input type="hidden" asp-for="request.Cordinating_id" />
+            <input type="hidden" asp-for="request.StatusRequest_id" />
+            @for (int i = 0; i < Model.listValueRequestAttr.Count; i++)
+            {
+                <div class="form-group">
+                    <input type="hidden" asp-for="listValueRequestAttr[i].Id" />
+                    <input type="hidden" asp-for="listValueRequestAttr[i].Attr_TypeRequest_id" />
+                    <input type="hidden" asp-for="listValueRequestAttr[i].Request_id" />
+
+                    <label class="control-label">
+                        @Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.NameAttributes
+                    </label>
+
+                    @if (Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.TypeData == "text")
+                    {
+                        <textarea asp-for="listValueRequestAttr[i].ValueText" class="form-control"></textarea>
+                    }
+                    else if (Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.TypeData == "Bool")
+                    {
+                        <select asp-for="listValueRequestAttr[i].ValueBool" class="form-control">
+                            <option value="true">Да</option>
+                            <option value="false">Нет</option>
+                        </select>
+                    }
+                    else if (Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.TypeData == "Employee")
+                    {
+                        <select asp-for="listValueRequestAttr[i].ValueEmloyee_id" class="form-control" asp-items="ViewBag.Employees"></select>
+                    }
+                    else if (Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.TypeData == "DateTime")
+                    {
+                        <input asp-for="listValueRequestAttr[i].ValueDate" class="form-control" />
+                    }
+                    else if (Model.listValueRequestAttr[i].Attributes_TypeRequest.Attributes.TypeData == "TypeVocation")
+                    {
+                        <select asp-for="listValueRequestAttr[i].ValueTypeVocation_id" class="form-control" asp-items="ViewBag.TypeVocation"></select>
+                    }
+                    <span asp-validation-for="request.Applicant_id" class="text-danger"></span>
+                </div>
+            }
+
+
+            <div class="form-group">
+                <label asp-for="request.StartDate" class="control-label"></label>
+                <input asp-for="request.StartDate" class="form-control" />
+                <span asp-validation-for="request.StartDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="request.EndDate" class="control-label"></label>
+                <input asp-for="request.EndDate" class="form-control" />
+                <span asp-validation-for="request.EndDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="request.Comments" class="control-label"></label>
+                <textarea asp-for="request.Comments" class="form-control"></textarea>
+                <span asp-validation-for="request.Comments" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Сохранить" class="btn btn-primary btn-block" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a class="btn btn-outline-secondary" asp-action="Index">
+        <i class="fa fa-arrow-left"></i> Назад
+    </a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

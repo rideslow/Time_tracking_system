@@ -1,0 +1,29 @@
+﻿@model Time_tracking_system.Domain.ViewModels.TypeVocationVM
+
+@{
+    ViewData["Title"] = "Создание нового типа отпуска";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Создание нового типа отпуска</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="Название типа отпуска" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <a class="btn btn-outline-secondary" asp-action="Index">
+                    <i class="fa fa-arrow-left"></i> Назад
+                </a>
+                <input type="submit" value="Создать" class="btn btn-outline-success" />
+            </div>
+        </form>
+    </div>
+</div>
+

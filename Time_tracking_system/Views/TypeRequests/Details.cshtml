@@ -1,0 +1,68 @@
+﻿@model List<Time_tracking_system.Domain.ViewModels.Attributes_TypeRequestVM>
+
+@{
+    ViewData["Title"] = "Подробнее";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@Html.DisplayFor(model => model[0].TypeRequest.Name)</h1>
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="row">
+    <div class="col-md-6">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                        @Html.DisplayNameFor(model => model[0].Attributes.NameAttributes)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model[0].Attributes.TypeData)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    <tr>
+                        <td>
+                            @(i+1)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => Model[i].Attributes.NameAttributes)
+                        </td>
+                        <td>
+                            @if (Model[i].Attributes.TypeData == "TypeVocation")
+                            {
+                                <span>Тип отпуска из списка</span>
+                            }
+                            else if (Model[i].Attributes.TypeData == "Employee")
+                            {
+                                <span>Пользователь из списка</span>
+                            }
+                            else if (Model[i].Attributes.TypeData == "Bool")
+                            {
+                                <span>Да/нет</span>
+                            }
+                            else if (Model[i].Attributes.TypeData == "DateTime")
+                            {
+                                <span>Дата</span>
+                            }
+                            else if (Model[i].Attributes.TypeData == "Text")
+                            {
+                                <span>Текст</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div>
+    <a class="btn btn-outline-secondary" asp-action="Index">
+        <i class="fa fa-arrow-left"></i> Вернуться к типам заявок
+    </a>
+</div>
+

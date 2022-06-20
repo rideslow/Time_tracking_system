@@ -1,0 +1,9 @@
+﻿@model Time_tracking_system.Domain.ViewModels.CreateRequestEmployeeVM
+
+<div>
+    <select name="value_Attributes_TypeRequests[@Model.index].Value"
+            asp-items="@(new SelectList(Model.listEmployee, "Id", "FullName"))"
+            class="form-control">
+    </select>
+    <span asp-validation-for="value_Attributes_TypeRequests[@Model.index].Value" class="text-danger"></span>
+</div>

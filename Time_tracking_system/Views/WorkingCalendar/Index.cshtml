@@ -1,0 +1,195 @@
+﻿@model List<Time_tracking_system.Domain.ViewModels.EmployeeVM>
+
+@{
+    ViewData["Title"] = "Рабочий календарь";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Рабочий календарь</h1>
+<hr />
+<div class="row form-group">
+    <div class="col-md-4">
+        <h4>Список сотрудников</h4>
+        <select name="value" asp-items="@(new SelectList(Model, "Id", "FullName"))"
+                class="form-control custom-select"
+                onchange="userSelected(this.value)">
+        </select>
+    </div>
+    <div class="col-md-8">
+        <h4>Обозначение цветов на календаре</h4>
+        <div class="row">
+            <div class="col-md-5">
+                <i class="fas fa-square" style="color: #33cc33; font-size: 17px"> - Утверждена</i>
+                <br />
+                <i class="fas fa-square" style="color: #ff9900; font-size: 17px"> - Согласована</i>
+                <br />
+                <i class="fas fa-square" style="color: #ff0000; font-size: 17px"> - Не согласована или не утверждена</i>
+            </div>
+            <div class="col-md-5">
+                <i class="fas fa-square" style="color: #ff0066; font-size: 17px "> - Отправлена на согласование</i>
+                <br />
+                <i class="fas fa-square" style="color: #66ccff; font-size: 17px"> - Другой статус</i>
+            </div>
+        </div>
+
+    </div>
+</div>
+<hr />
+<div class="form-group">
+    <div id="loadingCalendar" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Загрузка...</div></div>
+    <div class="content-wrapper">
+        <!-- /.col -->
+        <div class="col-md-9">
+            <div class="card card-primary">
+                <div class="card-body p-0">
+                    <!-- THE CALENDAR -->
+                    <div id="calendar"></div>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+        <!-- /.col -->
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+        $(function () {
+            var val = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model[0].Id) as String);
+            userSelected(val);
+        });
+
+        function userSelected(val) {
+            document.getElementById("calendar").innerHTML = "";
+            $.ajax({
+                type: 'GET',
+                url: '@Url.Action("GetRequestsByIdEmployee")',
+                data: { idEmployee: val },
+                beforeSend: function () {
+                    $('#loadingCalendar').show();
+                },
+                success: function (listRequests) {
+                    $('#loadingCalendar').hide();
+                    var events = convertToEvents(listRequests);
+                    $.ajax({
+                        type: 'GET',
+                        url: '@Url.Action("GetHolidays")',
+                        success: function (listHolidays) {
+                            var holidaysList = listHolidays;
+                            calendarRender(events, holidaysList);
+                        }
+                    });
+                }
+            });
+        }
+
+        function convertToEvents(data) {
+            var events = [];
+            for (var i = 0; i < data.length; i++) {
+                let startDateConvert = moment(data[i].startDate).format("YYYY-MM-DD");
+                let endDateConvert = moment(data[i].endDate).format("YYYY-MM-DD");
+                if (data[i].statusRequest.name == "Утверждена") {
+                    //зеленый цвет
+                    events.push({
+                        title: data[i].typeRequest.name,
+                        description: data[i].typeRequest.name,
+                        start: new Date(startDateConvert),
+                        end: new Date(endDateConvert),
+                        url: '@Url.Action("Details", "Requests")\\' + data[i].id,
+                        backgroundColor: '#33cc33',
+                        borderColor: '#33cc33'
+                    })
+                }
+                else if (data[i].statusRequest.name == "Согласована")
+                {
+                    //оранжевый цвет
+                    events.push({
+                        title: data[i].typeRequest.name,
+                        description: data[i].typeRequest.name,
+                        start: new Date(startDateConvert),
+                        end: new Date(endDateConvert),
+                        url: '@Url.Action("Details", "Requests")\\' + data[i].id,
+                        backgroundColor: '#ff9900',
+                        borderColor: '#ff9900'
+                    })
+                }
+                else if (data[i].statusRequest.name == "Не согласована" ||
+                    data[i].statusRequest.name == "Не утверждена")
+                {
+                    //красный цвет
+                    events.push({
+                        title: data[i].typeRequest.name,
+                        description: data[i].typeRequest.name,
+                        start: new Date(startDateConvert),
+                        end: new Date(endDateConvert),
+                        url: '@Url.Action("Details", "Requests")\\' + data[i].id,
+                        backgroundColor: '#ff0000',
+                        borderColor: '#ff0000'
+                    })
+                }
+                else if (data[i].statusRequest.name == "Отправлена на согласование") {
+                    //розовый цвет
+                    events.push({
+                        title: data[i].typeRequest.name,
+                        description: data[i].typeRequest.name,
+                        start: new Date(startDateConvert),
+                        end: new Date(endDateConvert),
+                        url: '@Url.Action("Details", "Requests")\\' + data[i].id,
+                        backgroundColor: '#ff0066',
+                        borderColor: '#ff0066'
+                    })
+                }
+                else {
+                    //голубой цвет
+                    events.push({
+                        title: data[i].typeRequest.name,
+                        description: data[i].typeRequest.name,
+                        start: new Date(startDateConvert),
+                        end: new Date(endDateConvert),
+                        url: '@Url.Action("Details", "Requests")\\' + data[i].id,
+                        backgroundColor: '#66ccff',
+                        borderColor: '#66ccff'
+                    })
+                }
+            }
+            return events;
+        }
+
+    function calendarRender(events, holidaysList) {
+            var Calendar = FullCalendar.Calendar;
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new Calendar(calendarEl, {
+                firstDay: 1,
+                eventDidMount: function (info) {
+                    let tooltip = new bootstrap.Tooltip(info.el, {
+                        title: info.event.extendedProps.description,
+                        placement: "top",
+                        trigger: "hover",
+                        container: "body"
+                    });
+                },
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: ''
+                },
+                locale: 'ru',
+                themeSystem: 'bootstrap',
+                events: events,
+                datesSet: function (dateInfo) {
+                    $("td, th").each(function () {
+                        for (var i = 0; i < holidaysList.length; i++) {
+                            var DateHoliday = moment(holidaysList[i].holidayDate).format("YYYY-MM-DD");
+                            if (DateHoliday == $(this).attr("data-date")) {
+                                $(this).css("background-color", "#FA5942");
+                            }
+                        }
+                    });
+                }
+            });
+            calendar.render();
+        }
+</script>
+}

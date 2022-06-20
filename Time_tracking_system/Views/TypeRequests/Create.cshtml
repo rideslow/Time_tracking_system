@@ -1,0 +1,72 @@
+﻿@model Time_tracking_system.Domain.ViewModels.TypeRequestVM
+
+@{
+    ViewData["Title"] = "Создание нового типа заявки";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Создание нового типа заявки</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="Название типа заявки" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div id="attributes">
+                <div class="form-group">
+                    <label class="control-label">Атрибут типа заявки</label>
+                    <select name="attr" asp-items="ViewBag.Attributes" class="form-control"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="button" value="Добавить атрибут" class="btn btn-info" onclick="addAttr()" />
+                <input type="button" value="Удалить атрибут" class="btn btn-danger" onclick="removeAttr()" />
+            </div>
+
+            <div class="form-group">
+                <a class="btn btn-outline-secondary" asp-action="Index">
+                    <i class="fa fa-arrow-left"></i> Назад
+                </a>
+                <input type="submit" value="Создать" class="btn btn-outline-success" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+    var listAttr = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.Attributes) as String);
+    var attrCount = 1;
+        function addAttr() {
+            var select = "<select name=\"attr\" class=\"form-control\">";
+            for (var i = 0; i < listAttr.length; i++) {
+                select = select + "<option value=\"" + listAttr[i].Value + "\">" + listAttr[i].Text + "</option>";
+            }
+            select = select + "</select>";
+            var div = document.createElement("div");
+            div.setAttribute("id", "attr" + attrCount);
+            div.classList.add('form-group');
+            div.innerHTML = select;
+            document.getElementById("attributes").appendChild(div);
+            attrCount = attrCount + 1;
+        }
+
+        function removeAttr() {
+            if (attrCount > 1) {
+                var parentDiv = document.getElementById("attributes");
+                var removeDiv = document.getElementById("attr" + (attrCount - 1));
+                parentDiv.removeChild(removeDiv);
+                attrCount = attrCount - 1;
+            }
+        }
+
+    </script>
+}
+

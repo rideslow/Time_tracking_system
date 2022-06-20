@@ -1,0 +1,8 @@
+﻿@model Time_tracking_system.Domain.ViewModels.CreateRequestTypeVocationVM
+
+<div>
+    <select name="value_Attributes_TypeRequests[@Model.index].Value"
+            asp-items="@(new SelectList(Model.typeVocations, "Id", "Name"))"
+            class="form-control">
+    </select>
+</div>

@@ -1,0 +1,148 @@
+﻿@model Time_tracking_system.Domain.ViewModels.YearAndHolidayCalendarVM
+
+@{
+    ViewData["Title"] = "Редактирование";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Редактирование календаря</h1>
+
+<div class="alert bg-info" role="alert">
+    <h4 class="alert-heading">
+        <strong>@Html.DisplayNameFor(model => model.Year.Year):</strong>
+        @Html.DisplayFor(model => model.Year.Year)
+    </h4>
+    <hr />
+    <p>
+        <strong>@Html.DisplayNameFor(model => model.Year.CalendarInputStatus):</strong>
+        @if (Model.Year.CalendarInputStatus == true)
+        {
+            <span id="statusName">Введен в обращение</span>
+        }
+        else
+        {
+            <span id="statusName">Ожидает ввода в обращение</span>
+        }
+    </p>
+</div>
+
+<div class="content-wrapper">
+    <!-- /.col -->
+    <div class="col-md-9">
+        <div class="card card-primary">
+            <div class="card-body p-0">
+                <!-- THE CALENDAR -->
+                <div id="calendar"></div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.col -->
+</div>
+
+<div class="form-group">
+    <a class="btn btn-outline-secondary" asp-action="Index">
+        <i class="fa fa-arrow-left"></i> Вернуться к списку годов
+    </a>
+    <input type="button" value="Сохранить" class="btn btn-primary" onclick="Save()" />
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+<script>
+        var selectedDate = [];
+        var Year;
+        $(function () {
+            Year = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(@Model.Year) as String);
+            selectedDate = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(@Model.ListHolidayCalendar) as String);
+            var startDate = Year.Year + "-01-01";
+            var endDate = (Number(Year.Year) + Number(1)) + "-01-01";
+            var Calendar = FullCalendar.Calendar;
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new Calendar(calendarEl, {
+                firstDay: 1,
+                validRange: {
+                    start: startDate,
+                    end: endDate
+                },
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: ''
+                },
+                locale: 'ru',
+                themeSystem: 'bootstrap',
+                dateClick: function (info) {
+                    var index = selectedDate.findIndex(x => moment(x.HolidayDate).format("YYYY-MM-DD") === info.dateStr);
+                    if (index == -1) {
+                        selectedDate.push(
+                            {
+                                HolidayDate: info.dateStr,
+                                Years_id: Year.Id,
+                                Status: "New"
+                            }
+                        );
+                        info.dayEl.style.backgroundColor = '#FA5942';
+                    }
+                    else if (selectedDate[index].Status == "Existing") {
+                        selectedDate[index].Status = "Removed";
+                        info.dayEl.style.backgroundColor = '';
+                    }
+                    else if (selectedDate[index].Status == "Removed") {
+                        selectedDate[index].Status = "Existing";
+                        info.dayEl.style.backgroundColor = '#FA5942';
+                    }
+                    else if (selectedDate[index].Status == "New"){
+                        selectedDate.splice(index, 1);
+                        info.dayEl.style.backgroundColor = '';
+                    }
+                },
+                datesSet: function (dateInfo) {
+                    $("td, th").each(function () {
+                        for (var i = 0; i < selectedDate.length; i++) {
+                            if (selectedDate[i].Status == "Existing" || selectedDate[i].Status == "New") {
+                                var DateHoliday = moment(selectedDate[i].HolidayDate).format("YYYY-MM-DD");
+                                if (DateHoliday == $(this).attr("data-date")) {
+                                    $(this).css("background-color", "#FA5942");
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            calendar.render();
+        });
+
+    function Save() {
+            $.ajax({
+                type: 'POST',
+                url: 'Edit',
+                dataType: 'json',
+                data: {
+                    selectidDate: JSON.stringify(selectedDate)
+                },
+                success: function (data) {
+                    if (!data) {
+                        $(document).Toasts('create', {
+                            class: 'bg-danger',
+                            title: 'Ошибка',
+                            autohide: true,
+                            delay: 2500,
+                            position: 'bottomRight',
+                            body: 'Произошла ошибка при сохранении изменений. Повторите позднее.'
+                        });
+                        selectedDate = [];
+                    }
+                    else {
+                        var url = '@Url.Action("Index", "HolidayCalendar")';
+                        window.location.href = url;
+                    }
+                }
+            });
+        }
+</script>
+
+}
+
